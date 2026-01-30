@@ -1,0 +1,6 @@
+# my added files
+/node_modules
+.env
+.vercel
+coverage/
+.nyc_output/

@@ -1,0 +1,69 @@
+{
+  "name": "orta-full-stack-dev-test-be",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "format": "prettier --write \"**/*.{js,md}\"",
+    "test": "NODE_ENV=test mocha test/**/*.test.js --timeout 10000",
+    "test:coverage": "NODE_ENV=test c8 mocha test/**/*.test.js --timeout 10000",
+    "coverage": "npm run test:coverage",
+    "coverage:open": "npm run coverage && open coverage/index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.18",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.2",
+    "nodemailer": "^7.0.6",
+    "nodemon": "^3.1.10",
+    "serverless-http": "^4.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "validator": "^13.15.15",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.5.2",
+    "@types/validator": "^13.15.3",
+    "c8": "^10.1.3",
+    "chai": "^6.0.1",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "mocha": "^11.7.2",
+    "mongodb-memory-server": "^10.2.1",
+    "prettier": "3.6.2",
+    "sinon": "^21.0.0",
+    "supertest": "^7.1.4"
+  },
+  "c8": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "test/**",
+      "src/swagger/**",
+      "src/migrations/**"
+    ],
+    "reporter": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "check-coverage": false,
+    "lines": 70,
+    "functions": 70,
+    "branches": 60,
+    "statements": 70
+  }
+}
