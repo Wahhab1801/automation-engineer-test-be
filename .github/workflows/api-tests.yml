@@ -43,8 +43,8 @@ jobs:
         JWT_SECRET: test_secret_key
         PORT: 8000
       run: |
-        npm run dev &
-        npx wait-on http://localhost:8000/api
+        npm start &
+        npx wait-on http://localhost:8000/api/docs
       timeout-minutes: 2
 
     - name: Run Postman Collection (Newman)
