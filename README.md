@@ -7,6 +7,17 @@ This is the backend system for the **Shift Manager** application, built with **N
 - Password reset via email with secure token flow
 - Auto-generated API docs using Swagger (OpenAPI 3.0)
 
+
+---
+
+## 🚀 Deliverables
+
+1.  **Postman Collection**: [Backend_Task_API_Tests.postman_collection.json](./tests/postman/Backend_Task_API_Tests.postman_collection.json)
+2.  **Environment File**: [Backend_Task_Env.postman_environment.json](./tests/postman/Backend_Task_Env.postman_environment.json)
+3.  **Newman Report**: [newman-report.html](./tests/newman-report.html) (Generated after running tests)
+4.  **GitHub Actions Workflow**: [api-tests.yml](./.github/workflows/api-tests.yml)
+5.  **Testing Strategy & Guide**: [TESTING.md](./TESTING.md)
+
 ---
 
 ## Folder Structure
