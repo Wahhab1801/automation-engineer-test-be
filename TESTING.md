@@ -80,3 +80,58 @@ The Postman collection is structured as a narrative flow rather than atomic, iso
 In CI, we use `npx wait-on http://localhost:8000/api/docs`.
 - **Reason**: The server takes a few seconds to connect to Mongo and start listening. Without this, the tests would fail immediately with "Connection Refused".
 - **Choice**: We use `/api/docs` because it guarantees the Express app is fully routed and serving traffic, whereas a root `/` might not be defined.
+
+---
+
+## 4. Security & Improvement Recommendations
+
+While analyzing the codebase, several areas for security improvement were identified. These should be addressed to harden the application before production deployment.
+
+### **1. User Enumeration Vulnerability**
+**Observation**: The authentication responses leak information about whether a user exists or not.
+- If an email **does not exist**, the API returns `404 User does not exist`.
+- If an email **exists** but the password is wrong, the API returns `400 Invalid email or password`.
+
+**Example Responses**:
+*Unknown Email:john1@example.com*
+```json
+{
+    "name": "Error",
+    "message": "User does not exist",
+    "statusCode": 404,
+    "errorCode": "USER_NOT_FOUND",
+    "timestamp": "2026-02-04T20:35:04.915Z"
+}
+```
+*Known Email:john@example.com*
+```json
+{
+    "name": "Error",
+    "message": "Invalid email or password",
+    "statusCode": 400,
+    "errorCode": "INVALID_CREDENTIALS",
+    "timestamp": "2026-02-04T20:36:09.253Z"
+}
+```
+
+**Risk**: An attacker can compile a list of valid email addresses (usernames) by brute-forcing the login endpoint and checking for `400` vs `404` status codes.
+
+**Recommendation**:
+- Standardize the response for all login failures to `401 Unauthorized` or `400 Bad Request` with a generic message like "Invalid email or password".
+- Ensure the response time is consistent (see below).
+
+### **2. Timing Attacks**
+**Observation**: The login logic returns immediately if a user is not found, but performs a computationally expensive `bcrypt.compare` if the user is found.
+**Risk**: Even with a generic error message, an attacker can measure the response time. A "fast" generic error implies "User Not Found", while a "slow" generic error implies "User Found (but wrong password)".
+**Recommendation**: implementing a "dummy" hash comparison when the user is not found to normalize response times.
+
+### **3. Rate Limiting**
+**Observation**: There is currently no rate limiting middleware (e.g., `express-rate-limit`) applied to the `login` or `register` endpoints.
+**Risk**: Susceptibility to brute-force password attacks and Denial of Service (DoS) attacks.
+**Recommendation**: Implement a rate limiter to restrict the number of requests from a single IP within a time window (e.g., 5 attempts per 15 minutes).
+
+### **4. CORS Configuration**
+**Observation**: The server is configured with `app.use(cors())`, which defaults to allowing requests from **any** origin (`Access-Control-Allow-Origin: *`).
+**Risk**: Malicious websites could make authenticated requests to the API if cookie-based auth were used (though this API currently uses JWTs in memory/response body, restricting CORS is still a best practice to prevent unauthorized browser-based interaction).
+**Recommendation**: Configure CORS to only allow requests from specific trusted domains (e.g., the hosted frontend URL).
+
