@@ -28,7 +28,7 @@ jobs:
       run: npm ci
 
     - name: Install Newman & Reporter
-      run: npm install -g newman newman-reporter-htmlextra
+      run: npm install -g newman newman-reporter-htmlextra newman-reporter-json
 
     - name: Seed Database
       env:
@@ -53,12 +53,54 @@ jobs:
           -e tests/postman/Backend_Task_Env.postman_environment.json \
           --env-var "adminEmail=admin@example.com" \
           --env-var "adminPassword=StrongPass123!" \
-          -r cli,htmlextra \
-          --reporter-htmlextra-export newman-report.html
+          -r cli,htmlextra,json \
+          --reporter-htmlextra-export newman-report.html \
+          --reporter-json-export newman-report.json
+
+    - name: Comment Test Summary
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = './newman-report.json';
+          
+          if (!fs.existsSync(path)) {
+            console.log("No newman report found, skipping comment.");
+            return;
+          }
+
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const stats = report.run.stats;
+          const failures = report.run.failures;
+
+          const duration = (report.run.timings.completed - report.run.timings.started) / 1000;
+
+          let body = `### API Test Results\n\n`;
+          body += `**Total:** ${stats.total} | **Passed:** ${stats.total - stats.failed} | **Failed:** ${stats.failed}\n`;
+          body += `**Duration:** ${duration.toFixed(2)}s\n\n`;
+
+          if (failures.length > 0) {
+            body += `####  Failures\n`;
+            failures.forEach(fail => {
+              body += `- **${fail.source.name}**: ${fail.error.message}\n`;
+            });
+          } else {
+             body += `All tests passed!`;
+          }
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
 
     - name: Upload Test Report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: newman-test-report
-        path: newman-report.html
+        path: |
+          newman-report.html
+          newman-report.json
