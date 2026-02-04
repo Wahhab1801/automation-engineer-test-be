@@ -75,10 +75,12 @@ jobs:
           const failures = report.run.failures;
 
           const duration = (report.run.timings.completed - report.run.timings.started) / 1000;
+          const avgTime = report.run.timings.responseAverage;
 
           let body = `### API Test Results\n\n`;
-          body += `**Total:** ${stats.total} | **Passed:** ${stats.total - stats.failed} | **Failed:** ${stats.failed}\n`;
-          body += `**Duration:** ${duration.toFixed(2)}s\n\n`;
+          body += `**Assertions:** Total: ${stats.assertions.total} | Passed: ${stats.assertions.total - stats.assertions.failed} | Failed: ${stats.assertions.failed}\n`;
+          body += `**Requests:** Total: ${stats.requests.total} | Failed: ${stats.requests.failed}\n`;
+          body += `**Performance:** Avg Response: ${Math.round(avgTime)}ms | Duration: ${duration.toFixed(2)}s\n\n`;
 
           if (failures.length > 0) {
             body += `####  Failures\n`;
