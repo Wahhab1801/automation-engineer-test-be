@@ -10,7 +10,7 @@ jobs:
 
     services:
       mongo:
-        image: mongo:latest
+        image: mongo:6.0
         ports:
           - 27017:27017
 
@@ -21,7 +21,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22.2'
         cache: 'npm'
 
     - name: Install Dependencies
@@ -32,27 +32,27 @@ jobs:
 
     - name: Seed Database
       env:
-        MONGO_URI: mongodb://localhost:27017/test_db
+        MONGO_URI: mongodb://localhost:27017/ortaDatabase
         ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
         ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       run: node scripts/seed-admin.js
 
     - name: Start Backend Server
       env:
-        MONGO_URI: mongodb://localhost:27017/test_db
+        MONGO_URI: mongodb://localhost:27017/ortaDatabase
         JWT_SECRET: test_secret_key
         PORT: 8000
       run: |
-        npm run dev &
-        npx wait-on http://localhost:8000/api
+        npm start &
+        npx wait-on http://localhost:8000/api/docs
       timeout-minutes: 2
 
     - name: Run Postman Collection (Newman)
       run: |
         newman run tests/postman/Backend_Task_API_Tests.postman_collection.json \
           -e tests/postman/Backend_Task_Env.postman_environment.json \
-          --env-var "adminEmail=${{ secrets.ADMIN_EMAIL }}" \
-          --env-var "adminPassword=${{ secrets.ADMIN_PASSWORD }}" \
+          --env-var "adminEmail=admin@example.com" \
+          --env-var "adminPassword=StrongPass123!" \
           -r cli,htmlextra \
           --reporter-htmlextra-export newman-report.html
 

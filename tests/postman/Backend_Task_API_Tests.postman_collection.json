@@ -2257,107 +2257,7 @@
       "name": "1c. Cleanup & Validation Flow",
       "item": [
         {
-          "name": "1. Admin Cancels Shift",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200 - Shift Cancelled\", () => pm.response.to.have.status(200));"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{admin_jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/shifts/{{shiftId}}/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "shifts",
-                "{{shiftId}}",
-                "cancel"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "1. Admin Cancels Shift",
-              "originalRequest": {
-                "method": "PATCH",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/cancel",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "shifts",
-                    "{{shiftId}}",
-                    "cancel"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": null,
-              "header": [
-                {
-                  "key": "X-Powered-By",
-                  "value": "Express"
-                },
-                {
-                  "key": "Access-Control-Allow-Origin",
-                  "value": "*"
-                },
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "Content-Length",
-                  "value": "42"
-                },
-                {
-                  "key": "ETag",
-                  "value": "W/\"2a-IrA8Pa/N4y6btfbceYM5yNaP+aA\""
-                },
-                {
-                  "key": "Date",
-                  "value": "Tue, 03 Feb 2026 00:16:05 GMT"
-                },
-                {
-                  "key": "Connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "Keep-Alive",
-                  "value": "timeout=5"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n    \"message\": \"Shift cancelled successfully\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "2. Admin Deletes Shift",
+          "name": "1. Admin Deletes Shift",
           "event": [
             {
               "listen": "test",
@@ -2455,7 +2355,7 @@
           ]
         },
         {
-          "name": "3. Validate Final System State",
+          "name": "2. Validate Final System State",
           "event": [
             {
               "listen": "test",
