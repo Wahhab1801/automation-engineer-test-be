@@ -1,0 +1,64 @@
+name: Backend API Tests
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Install Newman & Reporter
+      run: npm install -g newman newman-reporter-htmlextra
+
+    - name: Seed Database
+      env:
+        MONGO_URI: mongodb://localhost:27017/test_db
+        ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      run: node scripts/seed-admin.js
+
+    - name: Start Backend Server
+      env:
+        MONGO_URI: mongodb://localhost:27017/test_db
+        JWT_SECRET: test_secret_key
+        PORT: 8000
+      run: |
+        npm run dev &
+        npx wait-on http://localhost:8000/api
+      timeout-minutes: 2
+
+    - name: Run Postman Collection (Newman)
+      run: |
+        newman run tests/postman/Backend_Task_API_Tests.postman_collection.json \
+          -e tests/postman/Backend_Task_Env.postman_environment.json \
+          --env-var "adminEmail=${{ secrets.ADMIN_EMAIL }}" \
+          --env-var "adminPassword=${{ secrets.ADMIN_PASSWORD }}" \
+          -r cli,htmlextra \
+          --reporter-htmlextra-export newman-report.html
+
+    - name: Upload Test Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: newman-test-report
+        path: newman-report.html

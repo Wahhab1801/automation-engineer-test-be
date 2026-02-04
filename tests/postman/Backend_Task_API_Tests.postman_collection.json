@@ -1,0 +1,3901 @@
+{
+  "info": {
+    "_postman_id": "f506f9cd-b69d-4015-99fa-1c0f42cb2de2",
+    "name": "Backend Task API Tests",
+    "description": "API documentation for the Shift Manager backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48360064"
+  },
+  "item": [
+    {
+      "name": "1a. Admin End-to-End Flow",
+      "item": [
+        {
+          "name": "1. Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Admin Login Successful\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Admin JWT token is extracted and saved\", function () {\r",
+                  "        pm.expect(jsonData).to.have.property('token');\r",
+                  "        pm.environment.set(\"admin_jwt_token\", jsonData.token);\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Admin Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "293"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"125-rkCv629LAqqdIvzbcrpgD4E89aE\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 21:29:43 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODEwZjY5NTRmZDJkYmIwNzBiYTI0NCIsImlhdCI6MTc3MDA2Nzc4MywiZXhwIjoxNzcwMzI2OTgzfQ.QMJeKuxo0Z8rKg7Ux4YP4EXoXS0GDzvFJZpmi3PrsWc\",\n    \"user\": {\n        \"id\": \"69810f6954fd2dbb070ba244\",\n        \"name\": \"Super Admin User\",\n        \"email\": \"admin@example.com\",\n        \"role\": \"admin\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Register New Worker (Setup)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Worker Registered\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Response contains new worker user object\", function () {\r",
+                  "        pm.expect(jsonData.user).to.have.property('id');\r",
+                  "        pm.expect(jsonData.user.role).to.equal('worker');\r",
+                  "        pm.environment.set(\"workerId\", jsonData.user.id);\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const randomInt = pm.variables.replaceIn(\"{{$randomInt}}\");\r",
+                  "const workerEmail = `worker_${randomInt}@example.com`;\r",
+                  "pm.environment.set(\"workerEmail\", workerEmail);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"New Worker\",\n    \"email\": \"{{workerEmail}}\",\n    \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Register New Worker (Setup)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New Worker\",\n    \"email\": \"{{workerEmail}}\",\n    \"password\": \"Password123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "register"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "293"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"125-XiisYmYysjgUTY2jYOG+O/fOG4o\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 21:46:10 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODExYjIyNTRmZDJkYmIwNzBiYTI0ZiIsImlhdCI6MTc3MDA2ODc3MCwiZXhwIjoxNzcwMzI3OTcwfQ.vOcbFNCju4pAC-J1z_7GMtufCK-aOIy8GReVpYNJaFc\",\n    \"user\": {\n        \"id\": \"69811b2254fd2dbb070ba24f\",\n        \"name\": \"New Worker\",\n        \"email\": \"worker_125@example.com\",\n        \"role\": \"worker\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Admin Promotes User to Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - User Promoted\", () => pm.response.to.have.status(200));\r",
+                  "    pm.test(\"User role is now admin\", function () {\r",
+                  "        const jsonData = pm.response.json();\r",
+                  "        pm.expect(jsonData.user.role).to.equal(\"admin\");\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{workerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/promote-to-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "promote-to-admin"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Admin Promotes User to Admin",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{workerId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/promote-to-admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "promote-to-admin"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "158"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"9e-pG2LN/hg4zsq9z0+M7DTNW2rxuU\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 22:01:33 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"User promoted to admin successfully\",\n    \"user\": {\n        \"id\": \"69811b2254fd2dbb070ba24f\",\n        \"name\": \"New Worker\",\n        \"email\": \"worker_125@example.com\",\n        \"role\": \"admin\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Admin Creates Shift for Worker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 201 - Shift Created\", () => pm.response.to.have.status(201));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.collectionVariables.set(\"shiftId\", jsonData.shift.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"09:00\",\n    \"finishTime\": \"17:00\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    },\n    \"date\": \"2026-03-05T09:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            },
+            "description": "Create a new shift (admin only)"
+          },
+          "response": [
+            {
+              "name": "4. Admin Creates Shift for Worker 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"morning\",\n        \"weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"09:00\",\n    \"finishTime\": \"17:00\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    },\n    \"date\": \"2026-03-05T09:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1266"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"4f2-yF82g5vSssfylLcv3MwAuJUt10I\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 22:15:36 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"ValidationError\",\n    \"message\": \"Validation failed\",\n    \"statusCode\": 400,\n    \"errorCode\": \"VALIDATION_ERROR\",\n    \"timestamp\": \"2026-02-02T22:15:36.654Z\",\n    \"stack\": \"ValidationError: Validation failed\\n    at zodSchemaValidator (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/utils/errors/utils.js:14:13)\\n    at createShiftController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:310:27)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:42:5)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\",\n    \"issues\": [\n        {\n            \"path\": \"typeOfShift.0\",\n            \"error\": \"Invalid option: expected one of \\\"Weekend\\\"|\\\"Weekday\\\"|\\\"Evening\\\"|\\\"Morning\\\"|\\\"Night\\\"\"\n        },\n        {\n            \"path\": \"typeOfShift.1\",\n            \"error\": \"Invalid option: expected one of \\\"Weekend\\\"|\\\"Weekday\\\"|\\\"Evening\\\"|\\\"Morning\\\"|\\\"Night\\\"\"\n        }\n    ]\n}"
+            },
+            {
+              "name": "4. Admin Creates Shift for Worker",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"09:00\",\n    \"finishTime\": \"17:00\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    },\n    \"date\": \"2026-03-05T09:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "692"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"2b4-CAYrt4GYPa1zMmJxZQEB4ghoheQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 22:19:38 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shift\": {\n        \"id\": \"698122fa881a2d605a559c82\",\n        \"title\": \"Morning Shift\",\n        \"role\": \"Guard\",\n        \"typeOfShift\": [\n            \"Morning\",\n            \"Weekday\"\n        ],\n        \"startTime\": \"09:00\",\n        \"finishTime\": \"17:00\",\n        \"numOfShiftsPerDay\": 1,\n        \"date\": \"2026-03-05T09:00:00.000Z\",\n        \"status\": \"Scheduled\",\n        \"clockInTime\": null,\n        \"clockOutTime\": null,\n        \"createdAt\": \"2026-02-02T22:19:38.107Z\",\n        \"updatedAt\": \"2026-02-02T22:19:38.107Z\",\n        \"user\": {\n            \"id\": \"69811b2254fd2dbb070ba24f\",\n            \"name\": \"New Worker\",\n            \"email\": \"worker_125@example.com\",\n            \"role\": \"admin\"\n        },\n        \"location\": {\n            \"id\": \"6981226b881a2d605a559c75\",\n            \"name\": \"Main Office\",\n            \"postCode\": \"12345\",\n            \"distance\": 0,\n            \"coordinates\": {\n                \"longitude\": -74.006,\n                \"latitude\": 40.7128,\n                \"useRotaCloud\": true,\n                \"_id\": \"698122fa881a2d605a559c80\"\n            },\n            \"address\": \"123 Main St\"\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "5. Admin Fetches All Shifts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Fetched All Shifts\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response has shifts array\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property(\"shifts\");\r",
+                  "    pm.expect(jsonData.shifts).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Newly created shift is present\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    const shiftId = pm.collectionVariables.get(\"shiftId\");\r",
+                  "\r",
+                  "    pm.expect(\r",
+                  "        jsonData.shifts.some(shift => shift.id === shiftId),\r",
+                  "        \"Expected shiftId to exist in shifts array\"\r",
+                  "    ).to.be.true;\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "5. Admin Fetches All Shifts",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1490"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"5d2-d0rw3Hn+CWjs8qUZBpNj7+ySRMQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 22:34:24 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shifts\": [\n        {\n            \"id\": \"6981226b881a2d605a559c78\",\n            \"title\": \"Morning Shift\",\n            \"role\": \"Guard\",\n            \"typeOfShift\": [\n                \"Morning\",\n                \"Weekday\"\n            ],\n            \"startTime\": \"09:00\",\n            \"finishTime\": \"17:00\",\n            \"numOfShiftsPerDay\": 1,\n            \"date\": \"2026-03-05T09:00:00.000Z\",\n            \"status\": \"Scheduled\",\n            \"clockInTime\": null,\n            \"clockOutTime\": null,\n            \"createdAt\": \"2026-02-02T22:17:15.166Z\",\n            \"updatedAt\": \"2026-02-02T22:17:15.166Z\",\n            \"user\": {\n                \"id\": \"69811b2254fd2dbb070ba24f\",\n                \"name\": \"New Worker\",\n                \"email\": \"worker_125@example.com\",\n                \"role\": \"admin\"\n            },\n            \"location\": {\n                \"id\": \"6981226b881a2d605a559c75\",\n                \"name\": \"Main Office\",\n                \"postCode\": \"12345\",\n                \"distance\": 0,\n                \"coordinates\": {\n                    \"longitude\": -74.006,\n                    \"latitude\": 40.7128,\n                    \"useRotaCloud\": true,\n                    \"_id\": \"698122fa881a2d605a559c80\"\n                },\n                \"address\": \"123 Main St\"\n            }\n        },\n        {\n            \"id\": \"698122fa881a2d605a559c82\",\n            \"title\": \"Morning Shift\",\n            \"role\": \"Guard\",\n            \"typeOfShift\": [\n                \"Morning\",\n                \"Weekday\"\n            ],\n            \"startTime\": \"09:00\",\n            \"finishTime\": \"17:00\",\n            \"numOfShiftsPerDay\": 1,\n            \"date\": \"2026-03-05T09:00:00.000Z\",\n            \"status\": \"Scheduled\",\n            \"clockInTime\": null,\n            \"clockOutTime\": null,\n            \"createdAt\": \"2026-02-02T22:19:38.107Z\",\n            \"updatedAt\": \"2026-02-02T22:19:38.107Z\",\n            \"user\": {\n                \"id\": \"69811b2254fd2dbb070ba24f\",\n                \"name\": \"New Worker\",\n                \"email\": \"worker_125@example.com\",\n                \"role\": \"admin\"\n            },\n            \"location\": {\n                \"id\": \"6981226b881a2d605a559c75\",\n                \"name\": \"Main Office\",\n                \"postCode\": \"12345\",\n                \"distance\": 0,\n                \"coordinates\": {\n                    \"longitude\": -74.006,\n                    \"latitude\": 40.7128,\n                    \"useRotaCloud\": true,\n                    \"_id\": \"698122fa881a2d605a559c80\"\n                },\n                \"address\": \"123 Main St\"\n            }\n        }\n    ],\n    \"pagination\": {\n        \"currentPage\": 1,\n        \"totalPages\": 1,\n        \"totalCount\": 2,\n        \"hasNextPage\": false,\n        \"hasPrevPage\": false,\n        \"limit\": 10\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "6. Admin Delete Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "6. Admin Delete Shift",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "40"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"28-+bOrVxhDH24khRihXdDRMIaTios\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:11:16 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Shift deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1b. Worker End-to-End Flow",
+      "item": [
+        {
+          "name": "1. Register New User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const randomInt = pm.variables.replaceIn(\"{{$randomInt}}\");\r",
+                  "const workerEmail = `worker_flow_${randomInt}@example.com`;\r",
+                  "pm.environment.set(\"workerEmail\", workerEmail);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Worker Registered\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.environment.set(\"workerId\", jsonData.user.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Flow Worker\",\r\n    \"email\": \"{{workerEmail}}\",\r\n    \"password\": \"Password123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "1. Register New User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Flow Worker\",\r\n    \"email\": \"{{workerEmail}}\",\r\n    \"password\": \"Password123!\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "register"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "299"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"12b-riRoxMuIs99L9BjMLEgTP4w1LIE\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:08:57 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODEyZTg5ODgxYTJkNjA1YTU1OWNjOSIsImlhdCI6MTc3MDA3MzczNywiZXhwIjoxNzcwMzMyOTM3fQ.CwEdLOqqkjWQcI9rr2B-VU7m8KN4Li8fdz3rLM79UzA\",\n    \"user\": {\n        \"id\": \"69812e89881a2d605a559cc9\",\n        \"name\": \"Flow Worker\",\n        \"email\": \"worker_flow_560@example.com\",\n        \"role\": \"worker\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Worker Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 200 - Worker Login Successful\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Worker JWT token is extracted and saved\", function () {\r",
+                  "        pm.expect(jsonData).to.have.property('token');\r",
+                  "        pm.environment.set(\"worker_jwt_token\", jsonData.token);\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n        \"email\": \"{{workerEmail}}\",\r\n        \"password\": \"Password123!\"\r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "2. Worker Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"email\": \"{{workerEmail}}\",\r\n        \"password\": \"Password123!\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "299"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"12b-0/LTzBpI0E9p1bswvaRig2HdSpY\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:12:11 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODEyZTg5ODgxYTJkNjA1YTU1OWNjOSIsImlhdCI6MTc3MDA3MzkzMSwiZXhwIjoxNzcwMzMzMTMxfQ.pDUeVT2lxz3Azv0rsZPs8-tRz6607QC0gw7kzf60HPY\",\n    \"user\": {\n        \"id\": \"69812e89881a2d605a559cc9\",\n        \"name\": \"Flow Worker\",\n        \"email\": \"worker_flow_560@example.com\",\n        \"role\": \"worker\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Admin Creates Shift for Worker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 201 - Shift Created\", () => pm.response.to.have.status(201));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.collectionVariables.set(\"shiftId\", jsonData.shift.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();\r",
+                  "\r",
+                  "// Start = 5 minutes ago\r",
+                  "const start = new Date(now);\r",
+                  "start.setMinutes(start.getMinutes() - 5);\r",
+                  "\r",
+                  "// Finish = 2 hours after start (crosses midnight safely)\r",
+                  "const finish = new Date(start);\r",
+                  "finish.setHours(finish.getHours() + 2);\r",
+                  "\r",
+                  "function hhmm(d) {\r",
+                  "  return `${String(d.getHours()).padStart(2, \"0\")}:${String(d.getMinutes()).padStart(2, \"0\")}`;\r",
+                  "}\r",
+                  "\r",
+                  "// 🚨 CRITICAL: date must be TODAY\r",
+                  "pm.environment.set(\"date\", now.toISOString().split(\"T\")[0]);\r",
+                  "pm.environment.set(\"startTime\", hhmm(start));\r",
+                  "pm.environment.set(\"finishTime\", hhmm(finish));\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"{{startTime}}\",\n    \"finishTime\": \"{{finishTime}}\",\n    \"date\": \"{{date}}\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            },
+            "description": "Create a new shift (admin only)"
+          },
+          "response": [
+            {
+              "name": "4. Admin Creates Shift for Worker 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"morning\",\n        \"weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"09:00\",\n    \"finishTime\": \"17:00\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    },\n    \"date\": \"2026-03-05T09:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1266"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"4f2-yF82g5vSssfylLcv3MwAuJUt10I\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 22:15:36 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"ValidationError\",\n    \"message\": \"Validation failed\",\n    \"statusCode\": 400,\n    \"errorCode\": \"VALIDATION_ERROR\",\n    \"timestamp\": \"2026-02-02T22:15:36.654Z\",\n    \"stack\": \"ValidationError: Validation failed\\n    at zodSchemaValidator (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/utils/errors/utils.js:14:13)\\n    at createShiftController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:310:27)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:42:5)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\",\n    \"issues\": [\n        {\n            \"path\": \"typeOfShift.0\",\n            \"error\": \"Invalid option: expected one of \\\"Weekend\\\"|\\\"Weekday\\\"|\\\"Evening\\\"|\\\"Morning\\\"|\\\"Night\\\"\"\n        },\n        {\n            \"path\": \"typeOfShift.1\",\n            \"error\": \"Invalid option: expected one of \\\"Weekend\\\"|\\\"Weekday\\\"|\\\"Evening\\\"|\\\"Morning\\\"|\\\"Night\\\"\"\n        }\n    ]\n}"
+            },
+            {
+              "name": "4. Admin Creates Shift for Worker",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"09:00\",\n    \"finishTime\": \"17:00\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    },\n    \"date\": \"2026-03-05T09:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "692"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"2b4-CAYrt4GYPa1zMmJxZQEB4ghoheQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 22:19:38 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shift\": {\n        \"id\": \"698122fa881a2d605a559c82\",\n        \"title\": \"Morning Shift\",\n        \"role\": \"Guard\",\n        \"typeOfShift\": [\n            \"Morning\",\n            \"Weekday\"\n        ],\n        \"startTime\": \"09:00\",\n        \"finishTime\": \"17:00\",\n        \"numOfShiftsPerDay\": 1,\n        \"date\": \"2026-03-05T09:00:00.000Z\",\n        \"status\": \"Scheduled\",\n        \"clockInTime\": null,\n        \"clockOutTime\": null,\n        \"createdAt\": \"2026-02-02T22:19:38.107Z\",\n        \"updatedAt\": \"2026-02-02T22:19:38.107Z\",\n        \"user\": {\n            \"id\": \"69811b2254fd2dbb070ba24f\",\n            \"name\": \"New Worker\",\n            \"email\": \"worker_125@example.com\",\n            \"role\": \"admin\"\n        },\n        \"location\": {\n            \"id\": \"6981226b881a2d605a559c75\",\n            \"name\": \"Main Office\",\n            \"postCode\": \"12345\",\n            \"distance\": 0,\n            \"coordinates\": {\n                \"longitude\": -74.006,\n                \"latitude\": 40.7128,\n                \"useRotaCloud\": true,\n                \"_id\": \"698122fa881a2d605a559c80\"\n            },\n            \"address\": \"123 Main St\"\n        }\n    }\n}"
+            },
+            {
+              "name": "3. Admin Creates Shift for Worker",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"09:00\",\n    \"finishTime\": \"17:00\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    },\n    \"date\": \"2026-03-05T09:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "699"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"2bb-hnjiaUa6zLaCtVULKraNErdXznw\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:24:34 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shift\": {\n        \"id\": \"69813232881a2d605a559cd3\",\n        \"title\": \"Morning Shift\",\n        \"role\": \"Guard\",\n        \"typeOfShift\": [\n            \"Morning\",\n            \"Weekday\"\n        ],\n        \"startTime\": \"09:00\",\n        \"finishTime\": \"17:00\",\n        \"numOfShiftsPerDay\": 1,\n        \"date\": \"2026-03-05T09:00:00.000Z\",\n        \"status\": \"Scheduled\",\n        \"clockInTime\": null,\n        \"clockOutTime\": null,\n        \"createdAt\": \"2026-02-02T23:24:34.340Z\",\n        \"updatedAt\": \"2026-02-02T23:24:34.340Z\",\n        \"user\": {\n            \"id\": \"69812e89881a2d605a559cc9\",\n            \"name\": \"Flow Worker\",\n            \"email\": \"worker_flow_560@example.com\",\n            \"role\": \"worker\"\n        },\n        \"location\": {\n            \"id\": \"6981226b881a2d605a559c75\",\n            \"name\": \"Main Office\",\n            \"postCode\": \"12345\",\n            \"distance\": 0,\n            \"coordinates\": {\n                \"longitude\": -74.006,\n                \"latitude\": 40.7128,\n                \"useRotaCloud\": true,\n                \"_id\": \"69813232881a2d605a559cd1\"\n            },\n            \"address\": \"123 Main St\"\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Worker Views Shifts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+                  "    pm.test(\"Shift list contains the assigned shift\", function () {\r",
+                  "        const jsonData = pm.response.json();\r",
+                  "        const createdShiftId = pm.collectionVariables.get(\"shiftId\");\r",
+                  "        const foundShift = jsonData.shifts.some(shift => shift.id === createdShiftId);\r",
+                  "        pm.expect(foundShift).to.be.true;\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/my-shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "my-shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "4. Worker Views Shifts",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/my-shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "my-shifts"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "814"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"32e-q6VXrtRSZXNvFGJY3P00HwMQJzQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:24:48 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shifts\": [\n        {\n            \"id\": \"69813232881a2d605a559cd3\",\n            \"title\": \"Morning Shift\",\n            \"role\": \"Guard\",\n            \"typeOfShift\": [\n                \"Morning\",\n                \"Weekday\"\n            ],\n            \"startTime\": \"09:00\",\n            \"finishTime\": \"17:00\",\n            \"numOfShiftsPerDay\": 1,\n            \"date\": \"2026-03-05T09:00:00.000Z\",\n            \"status\": \"Scheduled\",\n            \"clockInTime\": null,\n            \"clockOutTime\": null,\n            \"createdAt\": \"2026-02-02T23:24:34.340Z\",\n            \"updatedAt\": \"2026-02-02T23:24:34.340Z\",\n            \"user\": {\n                \"id\": \"69812e89881a2d605a559cc9\",\n                \"name\": \"Flow Worker\",\n                \"email\": \"worker_flow_560@example.com\",\n                \"role\": \"worker\"\n            },\n            \"location\": {\n                \"id\": \"6981226b881a2d605a559c75\",\n                \"name\": \"Main Office\",\n                \"postCode\": \"12345\",\n                \"distance\": 0,\n                \"coordinates\": {\n                    \"longitude\": -74.006,\n                    \"latitude\": 40.7128,\n                    \"useRotaCloud\": true,\n                    \"_id\": \"69813232881a2d605a559cd1\"\n                },\n                \"address\": \"123 Main St\"\n            }\n        }\n    ],\n    \"pagination\": {\n        \"currentPage\": 1,\n        \"totalPages\": 1,\n        \"totalCount\": 1,\n        \"hasNextPage\": false,\n        \"hasPrevPage\": false,\n        \"limit\": 10\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "5. Worker Clocks In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Clocked In\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Message is correct\", () => pm.expect(jsonData.message).to.eql(\"Successfully clocked in\"));\r",
+                  "    pm.test(\"Shift status is In Progress\", () => pm.expect(jsonData.shift.status).to.eql(\"In Progress\"));\r",
+                  "    pm.test(\"ClockInTime is present\", () => pm.expect(jsonData.shift.clockInTime).to.not.be.null);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "packages": {},
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}",
+                "clock-in"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "5. Worker Clocks In wrong time 400",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "clock-in"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "622"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"26e-NKPM1EYOhHTzka2GHGSCmp5UkXg\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:27:44 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"Error\",\n    \"message\": \"Cannot clock in more than 10 minutes before shift starts\",\n    \"statusCode\": 400,\n    \"errorCode\": \"SHIFT_TIME_EXPIRED\",\n    \"timestamp\": \"2026-02-02T23:27:44.086Z\",\n    \"stack\": \"Error: Cannot clock in more than 10 minutes before shift starts\\n    at clockInShift (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/services/shift/index.js:460:11)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\\n    at async clockInController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:473:26)\"\n}"
+            },
+            {
+              "name": "5. Worker Clocks In",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "clock-in"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "124"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"7c-RlSLNvFaqu6K6cphIswhoAJ3Ej8\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:57:32 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Successfully clocked in\",\n    \"shift\": {\n        \"id\": \"698139e0881a2d605a559d3a\",\n        \"status\": \"In Progress\",\n        \"clockInTime\": \"23:57\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "6. Worker Clocks Out",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 200 - Clocked Out\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Message is correct\", () => pm.expect(jsonData.message).to.eql(\"Successfully clocked out\"));\r",
+                  "    pm.test(\"Shift status is Completed\", () => pm.expect(jsonData.shift.status).to.eql(\"Completed\"));\r",
+                  "    pm.test(\"ClockOutTime is present\", () => pm.expect(jsonData.shift.clockOutTime).to.not.be.null);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}",
+                "clock-out"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "5. Worker Clocks In wrong time 400",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "clock-in"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "622"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"26e-NKPM1EYOhHTzka2GHGSCmp5UkXg\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:27:44 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"Error\",\n    \"message\": \"Cannot clock in more than 10 minutes before shift starts\",\n    \"statusCode\": 400,\n    \"errorCode\": \"SHIFT_TIME_EXPIRED\",\n    \"timestamp\": \"2026-02-02T23:27:44.086Z\",\n    \"stack\": \"Error: Cannot clock in more than 10 minutes before shift starts\\n    at clockInShift (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/services/shift/index.js:460:11)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\\n    at async clockInController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:473:26)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7. Worker Fails to Delete Shift (Negative Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 - Forbidden\", function () {\r",
+                  "        pm.response.to.have.status(403);\r",
+                  "    });\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is ADMIN_ROLE_REQUIRED\", function () {\r",
+                  "        pm.expect(jsonData.errorCode).to.equal('ADMIN_ROLE_REQUIRED');\r",
+                  "    });\r",
+                  "    pm.test(\"Message indicates admin role required\", function () {\r",
+                  "        pm.expect(jsonData.message).to.equal('Access denied. Admin role required');\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "7. Worker Fails to Delete Shift (Negative Test)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "475"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1db-o6ec/hDDpJSmPpALNnf2lISgZw4\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:08:24 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthorizationError\",\n    \"message\": \"Access denied. Admin role required\",\n    \"statusCode\": 403,\n    \"errorCode\": \"ADMIN_ROLE_REQUIRED\",\n    \"timestamp\": \"2026-02-03T00:08:24.535Z\",\n    \"stack\": \"AuthorizationError: Access denied. Admin role required\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:36:13)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8. Worker Views Shifts Invalid Jwt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 401 - Unauthorized\", () => pm.response.to.have.status(401));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is AUTH_FAILED\", () => pm.expect(jsonData.errorCode).to.eql(\"AUTH_FAILED\"));\r",
+                  "    pm.test(\"Message is Authentication failed\", () => pm.expect(jsonData.message).to.eql(\"Authentication failed\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid_token_12345",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/my-shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "my-shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "4. Worker Views Shifts",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/my-shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "my-shifts"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "814"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"32e-q6VXrtRSZXNvFGJY3P00HwMQJzQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:24:48 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shifts\": [\n        {\n            \"id\": \"69813232881a2d605a559cd3\",\n            \"title\": \"Morning Shift\",\n            \"role\": \"Guard\",\n            \"typeOfShift\": [\n                \"Morning\",\n                \"Weekday\"\n            ],\n            \"startTime\": \"09:00\",\n            \"finishTime\": \"17:00\",\n            \"numOfShiftsPerDay\": 1,\n            \"date\": \"2026-03-05T09:00:00.000Z\",\n            \"status\": \"Scheduled\",\n            \"clockInTime\": null,\n            \"clockOutTime\": null,\n            \"createdAt\": \"2026-02-02T23:24:34.340Z\",\n            \"updatedAt\": \"2026-02-02T23:24:34.340Z\",\n            \"user\": {\n                \"id\": \"69812e89881a2d605a559cc9\",\n                \"name\": \"Flow Worker\",\n                \"email\": \"worker_flow_560@example.com\",\n                \"role\": \"worker\"\n            },\n            \"location\": {\n                \"id\": \"6981226b881a2d605a559c75\",\n                \"name\": \"Main Office\",\n                \"postCode\": \"12345\",\n                \"distance\": 0,\n                \"coordinates\": {\n                    \"longitude\": -74.006,\n                    \"latitude\": 40.7128,\n                    \"useRotaCloud\": true,\n                    \"_id\": \"69813232881a2d605a559cd1\"\n                },\n                \"address\": \"123 Main St\"\n            }\n        }\n    ],\n    \"pagination\": {\n        \"currentPage\": 1,\n        \"totalPages\": 1,\n        \"totalCount\": 1,\n        \"hasNextPage\": false,\n        \"hasPrevPage\": false,\n        \"limit\": 10\n    }\n}"
+            },
+            {
+              "name": "8. Worker Views Shifts Invalid Jwt",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/my-shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "my-shifts"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1590"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"636-muqm1nNnnf/lCK61Ia/Vkx0P0yY\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 01:14:07 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthenticationError\",\n    \"message\": \"Authentication failed\",\n    \"statusCode\": 401,\n    \"errorCode\": \"AUTH_FAILED\",\n    \"timestamp\": \"2026-02-03T01:14:07.487Z\",\n    \"stack\": \"AuthenticationError: Authentication failed\\n    at requireAuthMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-auth.middleware.js:46:12)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at Route.dispatch (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:117:3)\\n    at handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:435:11)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:295:15\\n    at processParams (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:582:12)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:291:5)\\n    at Function.handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:186:3)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "9. Worker Views Shifts Empty Jwt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 - Unauthorized\", () => pm.response.to.have.status(401));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is AUTH_HEADER_MISSING\", () => pm.expect(jsonData.errorCode).to.eql(\"AUTH_HEADER_MISSING\"));\r",
+                  "    pm.test(\"Message is Authorization header missing\", () => pm.expect(jsonData.message).to.eql(\"Authorization header missing\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/my-shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "my-shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "4. Worker Views Shifts",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/my-shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "my-shifts"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "814"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"32e-q6VXrtRSZXNvFGJY3P00HwMQJzQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 02 Feb 2026 23:24:48 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shifts\": [\n        {\n            \"id\": \"69813232881a2d605a559cd3\",\n            \"title\": \"Morning Shift\",\n            \"role\": \"Guard\",\n            \"typeOfShift\": [\n                \"Morning\",\n                \"Weekday\"\n            ],\n            \"startTime\": \"09:00\",\n            \"finishTime\": \"17:00\",\n            \"numOfShiftsPerDay\": 1,\n            \"date\": \"2026-03-05T09:00:00.000Z\",\n            \"status\": \"Scheduled\",\n            \"clockInTime\": null,\n            \"clockOutTime\": null,\n            \"createdAt\": \"2026-02-02T23:24:34.340Z\",\n            \"updatedAt\": \"2026-02-02T23:24:34.340Z\",\n            \"user\": {\n                \"id\": \"69812e89881a2d605a559cc9\",\n                \"name\": \"Flow Worker\",\n                \"email\": \"worker_flow_560@example.com\",\n                \"role\": \"worker\"\n            },\n            \"location\": {\n                \"id\": \"6981226b881a2d605a559c75\",\n                \"name\": \"Main Office\",\n                \"postCode\": \"12345\",\n                \"distance\": 0,\n                \"coordinates\": {\n                    \"longitude\": -74.006,\n                    \"latitude\": 40.7128,\n                    \"useRotaCloud\": true,\n                    \"_id\": \"69813232881a2d605a559cd1\"\n                },\n                \"address\": \"123 Main St\"\n            }\n        }\n    ],\n    \"pagination\": {\n        \"currentPage\": 1,\n        \"totalPages\": 1,\n        \"totalCount\": 1,\n        \"hasNextPage\": false,\n        \"hasPrevPage\": false,\n        \"limit\": 10\n    }\n}"
+            },
+            {
+              "name": "8. Worker Views Shifts Invalid Jwt",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/my-shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "my-shifts"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1590"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"636-muqm1nNnnf/lCK61Ia/Vkx0P0yY\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 01:14:07 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthenticationError\",\n    \"message\": \"Authentication failed\",\n    \"statusCode\": 401,\n    \"errorCode\": \"AUTH_FAILED\",\n    \"timestamp\": \"2026-02-03T01:14:07.487Z\",\n    \"stack\": \"AuthenticationError: Authentication failed\\n    at requireAuthMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-auth.middleware.js:46:12)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at Route.dispatch (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:117:3)\\n    at handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:435:11)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:295:15\\n    at processParams (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:582:12)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:291:5)\\n    at Function.handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:186:3)\"\n}"
+            },
+            {
+              "name": "9. Worker Views Shifts Empty Jwt",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/my-shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "my-shifts"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1612"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"64c-8jkI2E2PCflzPC4PJkPxKtb92QQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 01:16:43 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthenticationError\",\n    \"message\": \"Authorization header missing\",\n    \"statusCode\": 401,\n    \"errorCode\": \"AUTH_HEADER_MISSING\",\n    \"timestamp\": \"2026-02-03T01:16:43.957Z\",\n    \"stack\": \"AuthenticationError: Authorization header missing\\n    at requireAuthMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-auth.middleware.js:19:13)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at Route.dispatch (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:117:3)\\n    at handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:435:11)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:295:15\\n    at processParams (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:582:12)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:291:5)\\n    at Function.handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:186:3)\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1c. Cleanup & Validation Flow",
+      "item": [
+        {
+          "name": "1. Admin Cancels Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Shift Cancelled\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "1. Admin Cancels Shift",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "cancel"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "42"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"2a-IrA8Pa/N4y6btfbceYM5yNaP+aA\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:16:05 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Shift cancelled successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Admin Deletes Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Shift Deleted by Admin\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "2. Admin Deletes Shift",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "40"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"28-+bOrVxhDH24khRihXdDRMIaTios\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:18:40 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Shift deleted successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Validate Final System State",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 - Shift Not Found\", () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "3. Validate Final System State",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "539"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"21b-Bp/5UhsBmOUOIAwhw8MICY5q0M0\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:20:38 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"Error\",\n    \"message\": \"Shift not found\",\n    \"statusCode\": 404,\n    \"errorCode\": \"SHIFT_NOT_FOUND\",\n    \"timestamp\": \"2026-02-03T00:20:38.763Z\",\n    \"stack\": \"Error: Shift not found\\n    at deleteShift (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/services/shift/index.js:319:11)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\\n    at async deleteShiftController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:357:5)\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication Coverage (Negative Tests)",
+      "item": [
+        {
+          "name": "1. Register - User Already Exists",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 400 - User Already Exists\", () => pm.response.to.have.status(400));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is USER_EXISTS\", () => pm.expect(jsonData.errorCode).to.eql(\"USER_EXISTS\"));\r",
+                  "    pm.test(\"Message says User already exists\", () => pm.expect(jsonData.message).to.eql(\"User already exists\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n        \"name\": \"Existing User\",\r\n        \"email\": \"{{adminEmail}}\",\r\n        \"password\": \"Password123!\"\r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "1. Register - User Already Exists",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"name\": \"Existing User\",\r\n        \"email\": \"{{adminEmail}}\",\r\n        \"password\": \"Password123!\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "register"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "560"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"230-MSfGPsE2af/g0t7PDr2peuG4RKo\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:23:20 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"Error\",\n    \"message\": \"User already exists\",\n    \"statusCode\": 400,\n    \"errorCode\": \"USER_EXISTS\",\n    \"timestamp\": \"2026-02-03T00:23:20.152Z\",\n    \"stack\": \"Error: User already exists\\n    at registerUser (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/services/authentication/index.js:33:11)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\\n    at async registerUserController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/authentication.controller.js:77:9)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Register - Invalid Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 - Validation Error\", () => pm.response.to.have.status(400));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is VALIDATION_ERROR\", () => pm.expect(jsonData.errorCode).to.eql(\"VALIDATION_ERROR\"));\r",
+                  "    pm.test(\"Contains password validation issue\", function() {\r",
+                  "        const passwordIssue = jsonData.issues.find(i => i.path === \"password\");\r",
+                  "        pm.expect(passwordIssue).to.exist;\r",
+                  "        pm.expect(passwordIssue.error).to.include(\"Password must be min 8 characters\");\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n        \"name\": \"Bad Pass User\",\r\n        \"email\": \"badpass@example.com\",\r\n        \"password\": \"pass\"\r\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "2. Register - Invalid Password",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"name\": \"Bad Pass User\",\r\n        \"email\": \"badpass@example.com\",\r\n        \"password\": \"pass\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "register"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1714"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"6b2-AAV+6bUutIkQOLkdusxgcVUXRy0\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:24:26 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"ValidationError\",\n    \"message\": \"Validation failed\",\n    \"statusCode\": 400,\n    \"errorCode\": \"VALIDATION_ERROR\",\n    \"timestamp\": \"2026-02-03T00:24:26.018Z\",\n    \"stack\": \"ValidationError: Validation failed\\n    at zodSchemaValidator (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/utils/errors/utils.js:14:13)\\n    at registerUserController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/authentication.controller.js:72:27)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at Route.dispatch (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:117:3)\\n    at handle (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:435:11)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:295:15\\n    at processParams (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:582:12)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\index.js:291:5)\",\n    \"issues\": [\n        {\n            \"path\": \"password\",\n            \"error\": \"Password must be min 8 characters long and include uppercase, lowercase, number, and symbol\"\n        }\n    ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Authorization Coverage",
+      "item": [
+        {
+          "name": "1. Worker Tries to Create Shift",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 - Forbidden\", () => pm.response.to.have.status(403));\r",
+                  "    pm.test(\"Error indicates admin role required\", function () {\r",
+                  "        const jsonData = pm.response.json();\r",
+                  "        pm.expect(jsonData.message).to.contain(\"Admin role required\");\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Morning Shift\",\r\n    \"role\": \"Guard\",\r\n    \"typeOfShift\": [\r\n        \"Morning\",\r\n        \"Weekday\"\r\n    ],\r\n    \"user\": \"{{workerId}}\",\r\n    \"startTime\": \"{{startTime}}\",\r\n    \"finishTime\": \"{{finishTime}}\",\r\n    \"date\": \"{{date}}\",\r\n    \"numOfShiftsPerDay\": 1,\r\n    \"location\": {\r\n        \"name\": \"Main Office\",\r\n        \"address\": \"123 Main St\",\r\n        \"postCode\": \"12345\",\r\n        \"cordinates\": {\r\n            \"latitude\": 40.7128,\r\n            \"longitude\": -74.0060\r\n        }\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "1. Worker Tries to Create Shift",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"title\": \"Morning Shift\",\r\n    \"role\": \"Guard\",\r\n    \"typeOfShift\": [\r\n        \"Morning\",\r\n        \"Weekday\"\r\n    ],\r\n    \"user\": \"{{workerId}}\",\r\n    \"startTime\": \"{{startTime}}\",\r\n    \"finishTime\": \"{{finishTime}}\",\r\n    \"date\": \"{{date}}\",\r\n    \"numOfShiftsPerDay\": 1,\r\n    \"location\": {\r\n        \"name\": \"Main Office\",\r\n        \"address\": \"123 Main St\",\r\n        \"postCode\": \"12345\",\r\n        \"cordinates\": {\r\n            \"latitude\": 40.7128,\r\n            \"longitude\": -74.0060\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "475"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1db-oAd24H8zezDf4hDfBkmEPZJWRII\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:33:28 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthorizationError\",\n    \"message\": \"Access denied. Admin role required\",\n    \"statusCode\": 403,\n    \"errorCode\": \"ADMIN_ROLE_REQUIRED\",\n    \"timestamp\": \"2026-02-03T00:33:28.784Z\",\n    \"stack\": \"AuthorizationError: Access denied. Admin role required\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:36:13)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Worker Tries to Get All Shifts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 403 - Forbidden\", () => pm.response.to.have.status(403));\r",
+                  "pm.test(\"Response body contains 'Access denied. Admin role required'\", () => pm.expect(pm.response.text()).to.include(\"Access denied. Admin role required\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "2. Worker Tries to Get All Shifts",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "475"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1db-efPCvzF0ES0iIDYmCB6TYKZs0qY\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:35:10 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthorizationError\",\n    \"message\": \"Access denied. Admin role required\",\n    \"statusCode\": 403,\n    \"errorCode\": \"ADMIN_ROLE_REQUIRED\",\n    \"timestamp\": \"2026-02-03T00:35:10.151Z\",\n    \"stack\": \"AuthorizationError: Access denied. Admin role required\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:36:13)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Worker Tries to Promote User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 403 - Forbidden\", () => pm.response.to.have.status(403));\r",
+                  "pm.test(\"Response body contains 'Access denied. Admin role required'\", () => pm.expect(pm.response.text()).to.include(\"Access denied. Admin role required\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": \"{{workerId}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/promote-to-admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "promote-to-admin"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "3. Worker Tries to Promote User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"userId\": \"{{workerId}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/promote-to-admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "promote-to-admin"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "475"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1db-2AnkuH3C/eqvg5ZtUEe4eih5MRg\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:37:08 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"AuthorizationError\",\n    \"message\": \"Access denied. Admin role required\",\n    \"statusCode\": 403,\n    \"errorCode\": \"ADMIN_ROLE_REQUIRED\",\n    \"timestamp\": \"2026-02-03T00:37:08.428Z\",\n    \"stack\": \"AuthorizationError: Access denied. Admin role required\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:36:13)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "These requests using the Worker Token to verify Worker cannot perform Admin actions."
+    },
+    {
+      "name": "4. Shift Management Edge Cases",
+      "item": [
+        {
+          "name": "1. Create Shift in Past",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 400 - Bad Request\", () => pm.response.to.have.status(400));\r",
+                  "    pm.test(\"Error mentions date cannot be in past\", function () {\r",
+                  "        // Inspect response validation error structure\r",
+                  "        const jsonData = pm.response.json();\r",
+                  "        pm.expect(JSON.stringify(jsonData)).to.include(\"past\");\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Morning Shift\",\r\n    \"role\": \"Guard\",\r\n    \"typeOfShift\": [\r\n        \"Morning\",\r\n        \"Weekday\"\r\n    ],\r\n    \"user\": \"{{workerId}}\",\r\n    \"startTime\": \"09:00\",\r\n    \"finishTime\": \"17:00\",\r\n    \"numOfShiftsPerDay\": 1,\r\n    \"location\": {\r\n        \"name\": \"Main Office\",\r\n        \"address\": \"123 Main St\",\r\n        \"postCode\": \"12345\",\r\n        \"cordinates\": {\r\n            \"latitude\": 40.7128,\r\n            \"longitude\": -74.0060\r\n        }\r\n    },\r\n    \"date\": \"2020-03-05T09:00:00.000Z\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "1. Create Shift in Past",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"title\": \"Morning Shift\",\r\n    \"role\": \"Guard\",\r\n    \"typeOfShift\": [\r\n        \"Morning\",\r\n        \"Weekday\"\r\n    ],\r\n    \"user\": \"{{workerId}}\",\r\n    \"startTime\": \"09:00\",\r\n    \"finishTime\": \"17:00\",\r\n    \"numOfShiftsPerDay\": 1,\r\n    \"location\": {\r\n        \"name\": \"Main Office\",\r\n        \"address\": \"123 Main St\",\r\n        \"postCode\": \"12345\",\r\n        \"cordinates\": {\r\n            \"latitude\": 40.7128,\r\n            \"longitude\": -74.0060\r\n        }\r\n    },\r\n    \"date\": \"2020-03-05T09:00:00.000Z\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1094"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"446-teVC18AobP948R5juevTHG6HKGA\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:43:27 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"ValidationError\",\n    \"message\": \"Validation failed\",\n    \"statusCode\": 400,\n    \"errorCode\": \"VALIDATION_ERROR\",\n    \"timestamp\": \"2026-02-03T00:43:27.739Z\",\n    \"stack\": \"ValidationError: Validation failed\\n    at zodSchemaValidator (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/utils/errors/utils.js:14:13)\\n    at createShiftController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:310:27)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:42:5)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\",\n    \"issues\": [\n        {\n            \"path\": \"date\",\n            \"error\": \"Date cannot be in the past and must be a valid date\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Admin Creates Shift for Worker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 201 - Shift Created\", () => pm.response.to.have.status(201));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.collectionVariables.set(\"shiftId\", jsonData.shift.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const now = new Date();\r",
+                  "\r",
+                  "// Start = 5 minutes ago\r",
+                  "const start = new Date(now);\r",
+                  "start.setMinutes(start.getMinutes() - 5);\r",
+                  "\r",
+                  "// Finish = 2 hours after start (crosses midnight safely)\r",
+                  "const finish = new Date(start);\r",
+                  "finish.setHours(finish.getHours() + 2);\r",
+                  "\r",
+                  "function hhmm(d) {\r",
+                  "  return `${String(d.getHours()).padStart(2, \"0\")}:${String(d.getMinutes()).padStart(2, \"0\")}`;\r",
+                  "}\r",
+                  "\r",
+                  "// 🚨 CRITICAL: date must be TODAY\r",
+                  "pm.environment.set(\"date\", now.toISOString().split(\"T\")[0]);\r",
+                  "pm.environment.set(\"startTime\", hhmm(start));\r",
+                  "pm.environment.set(\"finishTime\", hhmm(finish));\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"{{startTime}}\",\n    \"finishTime\": \"{{finishTime}}\",\n    \"date\": \"{{date}}\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            },
+            "description": "Create a new shift (admin only)"
+          },
+          "response": [
+            {
+              "name": "2. Admin Creates Shift for Worker",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Morning Shift\",\n    \"role\": \"Guard\",\n    \"typeOfShift\": [\n        \"Morning\",\n        \"Weekday\"\n    ],\n    \"user\": \"{{workerId}}\",\n    \"startTime\": \"{{startTime}}\",\n    \"finishTime\": \"{{finishTime}}\",\n    \"date\": \"{{date}}\",\n    \"numOfShiftsPerDay\": 1,\n    \"location\": {\n        \"name\": \"Main Office\",\n        \"address\": \"123 Main St\",\n        \"postCode\": \"12345\",\n        \"cordinates\": {\n            \"latitude\": 40.7128,\n            \"longitude\": -74.0060\n        }\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "699"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"2bb-A7rLx6nwdqjORZNYtWPTkBZUUj4\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:48:00 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"shift\": {\n        \"id\": \"698145c0881a2d605a559d93\",\n        \"title\": \"Morning Shift\",\n        \"role\": \"Guard\",\n        \"typeOfShift\": [\n            \"Morning\",\n            \"Weekday\"\n        ],\n        \"startTime\": \"00:43\",\n        \"finishTime\": \"02:43\",\n        \"numOfShiftsPerDay\": 1,\n        \"date\": \"2026-02-03T00:00:00.000Z\",\n        \"status\": \"Scheduled\",\n        \"clockInTime\": null,\n        \"clockOutTime\": null,\n        \"createdAt\": \"2026-02-03T00:48:00.107Z\",\n        \"updatedAt\": \"2026-02-03T00:48:00.107Z\",\n        \"user\": {\n            \"id\": \"69812e89881a2d605a559cc9\",\n            \"name\": \"Flow Worker\",\n            \"email\": \"worker_flow_560@example.com\",\n            \"role\": \"worker\"\n        },\n        \"location\": {\n            \"id\": \"6981226b881a2d605a559c75\",\n            \"name\": \"Main Office\",\n            \"postCode\": \"12345\",\n            \"distance\": 0,\n            \"coordinates\": {\n                \"longitude\": -74.006,\n                \"latitude\": 40.7128,\n                \"useRotaCloud\": true,\n                \"_id\": \"698145c0881a2d605a559d91\"\n            },\n            \"address\": \"123 Main St\"\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Clock Out Without Clock In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 - Bad Request\", () => pm.response.to.have.status(400));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is INVALID_SHIFT_STATUS\", () => pm.expect(jsonData.errorCode).to.eql(\"INVALID_SHIFT_STATUS\"));\r",
+                  "    pm.test(\"Message is correct\", () => pm.expect(jsonData.message).to.eql(\"Can only clock out from shifts in progress\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}",
+                "clock-out"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "3. Clock Out Without Clock In",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-out",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "clock-out"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "598"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"256-NLjFsd5wZa+SLUm3CyevtTKYm7w\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 01:01:01 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"Error\",\n    \"message\": \"Can only clock out from shifts in progress\",\n    \"statusCode\": 400,\n    \"errorCode\": \"INVALID_SHIFT_STATUS\",\n    \"timestamp\": \"2026-02-03T01:01:01.671Z\",\n    \"stack\": \"Error: Can only clock out from shifts in progress\\n    at clockOutShift (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/services/shift/index.js:518:11)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\\n    at async clockOutController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:492:26)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Worker Double Clock-In 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 - Clocked In\", () => pm.response.to.have.status(200));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Message is correct\", () => pm.expect(jsonData.message).to.eql(\"Successfully clocked in\"));\r",
+                  "    pm.test(\"Shift status is In Progress\", () => pm.expect(jsonData.shift.status).to.eql(\"In Progress\"));\r",
+                  "    pm.test(\"ClockInTime is present\", () => pm.expect(jsonData.shift.clockInTime).to.not.be.null);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}",
+                "clock-in"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "4. Worker Double Clock-In 1",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "clock-in"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "124"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"7c-JJ/epUDjJhGwe9DtHKMrRnje+zM\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:50:42 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Successfully clocked in\",\n    \"shift\": {\n        \"id\": \"698145c0881a2d605a559d93\",\n        \"status\": \"In Progress\",\n        \"clockInTime\": \"00:50\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "5. Worker Double Clock-In 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 - Bad Request\", () => pm.response.to.have.status(400));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is INVALID_SHIFT_STATUS\", () => pm.expect(jsonData.errorCode).to.eql(\"INVALID_SHIFT_STATUS\"));\r",
+                  "    pm.test(\"Message is correct\", () => pm.expect(jsonData.message).to.eql(\"Can only clock in to scheduled shifts\"));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{worker_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts",
+                "{{shiftId}}",
+                "clock-in"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "5. Worker Double Clock-In 2",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/shifts/{{shiftId}}/clock-in",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts",
+                    "{{shiftId}}",
+                    "clock-in"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "586"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"24a-6qqTr1zDilJyKWl35GhRdWcvFrw\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 00:53:56 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"Error\",\n    \"message\": \"Can only clock in to scheduled shifts\",\n    \"statusCode\": 400,\n    \"errorCode\": \"INVALID_SHIFT_STATUS\",\n    \"timestamp\": \"2026-02-03T00:53:56.502Z\",\n    \"stack\": \"Error: Can only clock in to scheduled shifts\\n    at clockInShift (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/services/shift/index.js:446:11)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\\n    at async clockInController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:473:26)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "6. Create Shift with Invalid Coordinates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  " pm.test(\"Status code is 400 - Validation Error\", () => pm.response.to.have.status(400));\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.test(\"Error code is VALIDATION_ERROR\", () => pm.expect(jsonData.errorCode).to.eql(\"VALIDATION_ERROR\"));\r",
+                  "    pm.test(\"Error message is Validation failed\", () => pm.expect(jsonData.message).to.eql(\"Validation failed\"));\r",
+                  "    pm.test(\"Issues array contains latitude error\", function () {\r",
+                  "        const issue = jsonData.issues.find(i => i.path === \"location.cordinates.latitude\");\r",
+                  "        pm.expect(issue).to.exist;\r",
+                  "        pm.expect(issue.error).to.include(\"Latitude must be between -90 and 90\");\r",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Morning Shift\",\r\n    \"role\": \"Guard\",\r\n    \"typeOfShift\": [\r\n        \"Morning\",\r\n        \"Weekday\"\r\n    ],\r\n    \"user\": \"{{workerId}}\",\r\n    \"startTime\": \"{{startTime}}\",\r\n    \"finishTime\": \"{{finishTime}}\",\r\n    \"date\": \"{{date}}\",\r\n    \"numOfShiftsPerDay\": 1,\r\n    \"location\": {\r\n        \"name\": \"Main Office\",\r\n        \"address\": \"123 Main St\",\r\n        \"postCode\": \"12345\",\r\n        \"cordinates\": {\r\n            \"latitude\": 95,\r\n            \"longitude\": 0\r\n        }\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shifts"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "6. Create Shift with Invalid Coordinates",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"title\": \"Morning Shift\",\r\n    \"role\": \"Guard\",\r\n    \"typeOfShift\": [\r\n        \"Morning\",\r\n        \"Weekday\"\r\n    ],\r\n    \"user\": \"{{workerId}}\",\r\n    \"startTime\": \"{{startTime}}\",\r\n    \"finishTime\": \"{{finishTime}}\",\r\n    \"date\": \"{{date}}\",\r\n    \"numOfShiftsPerDay\": 1,\r\n    \"location\": {\r\n        \"name\": \"Main Office\",\r\n        \"address\": \"123 Main St\",\r\n        \"postCode\": \"12345\",\r\n        \"cordinates\": {\r\n            \"latitude\": 95,\r\n            \"longitude\": 0\r\n        }\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/shifts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "shifts"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1102"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"44e-R32ClPPJvjStTf1/GsJcOSJP2Ew\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 03 Feb 2026 01:06:02 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"name\": \"ValidationError\",\n    \"message\": \"Validation failed\",\n    \"statusCode\": 400,\n    \"errorCode\": \"VALIDATION_ERROR\",\n    \"timestamp\": \"2026-02-03T01:06:02.416Z\",\n    \"stack\": \"ValidationError: Validation failed\\n    at zodSchemaValidator (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/utils/errors/utils.js:14:13)\\n    at createShiftController (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/controllers/shifts.controller.js:310:27)\\n    at Layer.handleRequest (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\layer.js:152:17)\\n    at next (C:\\\\Users\\\\adeni\\\\source\\\\repos\\\\Orta_QA_Test\\\\automation-engineer-test-be\\\\node_modules\\\\router\\\\lib\\\\route.js:157:13)\\n    at requireAdminMiddleware (file:///C:/Users/adeni/source/repos/Orta_QA_Test/automation-engineer-test-be/src/middlewares/require-admin.middleware.js:42:5)\\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\",\n    \"issues\": [\n        {\n            \"path\": \"location.cordinates.latitude\",\n            \"error\": \"Latitude must be between -90 and 90\"\n        }\n    ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "// // Define your maximum allowed response time (in milliseconds)\r",
+          "// const maxResponseTime = 500;\r",
+          "\r",
+          "// pm.test(`Global Performance: Response time is less than ${maxResponseTime}ms`, function () {\r",
+          "//     pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);\r",
+          "// });"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "shiftId",
+      "value": ""
+    }
+  ]
+}
