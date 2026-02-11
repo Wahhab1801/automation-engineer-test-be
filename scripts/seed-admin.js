@@ -2,6 +2,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import { registerUser } from '../src/services/authentication/index.js';
 import UserModel from '../src/models/user.model.js';
+import bcrypt from 'bcrypt';
 
 const seedAdmin = async () => {
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db';
@@ -35,8 +36,11 @@ const seedAdmin = async () => {
         const user = await UserModel.findOne({ email: adminEmail });
         if (user) {
             user.role = 'admin';
+            // Force reset password to ensure tests pass even if local DB state is stale
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(adminPassword, salt);
             await user.save();
-            console.log('User role manually updated to admin');
+            console.log('User role and password manually updated for admin');
         }
 
     } catch (error) {

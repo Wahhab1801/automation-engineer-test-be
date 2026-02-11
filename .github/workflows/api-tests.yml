@@ -26,16 +26,6 @@ jobs:
     - name: Install Dependencies
       run: npm ci
 
-    - name: Install Newman & Reporter
-      run: npm install -g newman newman-reporter-htmlextra newman-reporter-json
-
-    - name: Seed Database
-      env:
-        MONGO_URI: mongodb://localhost:27017/ortaDatabase
-        ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-      run: node scripts/seed-admin.js
-
     - name: Start Backend Server
       env:
         MONGO_URI: mongodb://localhost:27017/ortaDatabase
@@ -46,15 +36,10 @@ jobs:
         npx wait-on http://localhost:8000/api/docs
       timeout-minutes: 2
 
-    - name: Run Postman Collection (Newman)
-      run: |
-        newman run tests/postman/Backend_Task_API_Tests.postman_collection.json \
-          -e tests/postman/Backend_Task_Env.postman_environment.json \
-          --env-var "adminEmail=admin@example.com" \
-          --env-var "adminPassword=StrongPass123!" \
-          -r cli,htmlextra,json \
-          --reporter-htmlextra-export newman-report.html \
-          --reporter-json-export newman-report.json
+    - name: Run E2E Tests
+      env:
+        MONGO_URI: mongodb://localhost:27017/ortaDatabase
+      run: npm run e2e
 
     - name: Comment Test Summary
       if: always()
@@ -62,12 +47,15 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const path = './newman-report.json';
+          const reports = fs.readdirSync('newman').filter(fn => fn.endsWith('_newman-report.json'));
           
-          if (!fs.existsSync(path)) {
+          if (reports.length === 0) {
             console.log("No newman report found, skipping comment.");
             return;
           }
+
+          const path = 'newman/' + reports[0]; // Take the first matching report
+          console.log(`Analyzing report: ${path}`);
 
           const report = JSON.parse(fs.readFileSync(path, 'utf8'));
           const stats = report.run.stats;
@@ -103,5 +91,5 @@ jobs:
       with:
         name: newman-test-report
         path: |
-          newman-report.html
-          newman-report.json
+          newman/*_newman-report.html
+          newman/*_newman-report.json

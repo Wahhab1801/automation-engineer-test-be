@@ -430,7 +430,7 @@
                 "exec": [
                   " pm.test(\"Status code is 201 - Shift Created\", () => pm.response.to.have.status(201));\r",
                   "    const jsonData = pm.response.json();\r",
-                  "    pm.collectionVariables.set(\"shiftId\", jsonData.shift.id);"
+                  "    pm.environment.set(\"shiftId\", jsonData.shift.id);"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -651,7 +651,7 @@
                   "\r",
                   "pm.test(\"Newly created shift is present\", function () {\r",
                   "    const jsonData = pm.response.json();\r",
-                  "    const shiftId = pm.collectionVariables.get(\"shiftId\");\r",
+                  "    const shiftId = pm.environment.get(\"shiftId\");\r",
                   "\r",
                   "    pm.expect(\r",
                   "        jsonData.shifts.some(shift => shift.id === shiftId),\r",
@@ -1093,7 +1093,7 @@
                 "exec": [
                   " pm.test(\"Status code is 201 - Shift Created\", () => pm.response.to.have.status(201));\r",
                   "    const jsonData = pm.response.json();\r",
-                  "    pm.collectionVariables.set(\"shiftId\", jsonData.shift.id);"
+                  "    pm.environment.set(\"shiftId\", jsonData.shift.id);"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -1408,7 +1408,7 @@
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
                   "    pm.test(\"Shift list contains the assigned shift\", function () {\r",
                   "        const jsonData = pm.response.json();\r",
-                  "        const createdShiftId = pm.collectionVariables.get(\"shiftId\");\r",
+                  "        const createdShiftId = pm.environment.get(\"shiftId\");\r",
                   "        const foundShift = jsonData.shifts.some(shift => shift.id === createdShiftId);\r",
                   "        pm.expect(foundShift).to.be.true;\r",
                   "    });"
@@ -3161,7 +3161,7 @@
                 "exec": [
                   " pm.test(\"Status code is 201 - Shift Created\", () => pm.response.to.have.status(201));\r",
                   "    const jsonData = pm.response.json();\r",
-                  "    pm.collectionVariables.set(\"shiftId\", jsonData.shift.id);"
+                  "    pm.environment.set(\"shiftId\", jsonData.shift.id);"
                 ],
                 "type": "text/javascript",
                 "packages": {},
