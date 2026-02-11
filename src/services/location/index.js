@@ -21,7 +21,7 @@ const getLocations = async () => {
  */
 const createOrUpdateLocation = async (locationData) => {
   let location = await LocationModel.findOne({ name: locationData.name });
-
+  //hello this is a test comment
   if (!location) {
     location = new LocationModel(locationData);
     await location.save();
