@@ -1,0 +1,86 @@
+name: API E2E (Postman/Newman)
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/api-tests.yml"
+      - "postman/**"
+      - "src/**"
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      API_BASE_URL: https://automation-engineer-test-be.onrender.com/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run Postman collection
+        id: newman-run
+        continue-on-error: true
+        run: |
+          mkdir -p newman
+          newman run postman/ShiftManager.postman_collection.json \
+            -e postman/ShiftManager.postman_environment.json \
+            --env-var baseUrl=${API_BASE_URL} \
+            -r cli,json,htmlextra \
+            --reporter-json-export newman/report.json \
+            --reporter-htmlextra-export newman/report.html
+
+      - name: Comment Newman summary
+        id: newman-summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'newman/report.json';
+            if (!fs.existsSync(path)) {
+              core.setOutput('failed', 'true');
+              core.warning('Newman report.json not found.');
+              return;
+            }
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const stats = report.run.stats;
+            const failures = report.run.failures || [];
+            const failedCount = failures.length;
+            const summary = [
+              '## Newman Summary',
+              '',
+              `- Iterations: ${stats.iterations.total} (failed: ${stats.iterations.failed})`,
+              `- Requests: ${stats.requests.total} (failed: ${stats.requests.failed})`,
+              `- Test scripts: ${stats.testScripts.total} (failed: ${stats.testScripts.failed})`,
+              `- Assertions: ${stats.assertions.total} (failed: ${stats.assertions.failed})`,
+              `- Total failures: ${failedCount}`,
+            ].join('\n');
+            core.setOutput('failed', failedCount > 0 ? 'true' : 'false');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: summary,
+            });
+
+      - name: Fail if Newman tests failed
+        if: steps.newman-summary.outputs.failed == 'true'
+        run: exit 1
+
+      - name: Upload Newman report
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman/report.html
