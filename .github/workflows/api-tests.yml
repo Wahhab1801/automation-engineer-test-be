@@ -2,7 +2,6 @@ name: Backend API Tests
 
 on:
   pull_request:
-    branches: [ main, master ]
 
 jobs:
   api-tests:
